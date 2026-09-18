@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this benchmark, please cite it as below."
+type: software
+title: "randomized-pca"
+authors:
+  - family-names: "Stepushkina"
+    given-names: "Diana"
+    email: "stepushkina.05@gmail.com"
+version: "0.1.0"
+date-released: "2026-09-18"
+url: "https://github.com/CHANGE_ME/randomized-pca"
+abstract: "Benchmarking randomized PCA stability and downstream effects in single-cell RNA-seq analysis"
+license: MIT
+keywords:
+  - benchmark
+  - bioinformatics
+  - omnibenchmark
