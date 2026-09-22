@@ -18,6 +18,12 @@ software_environments:
         description: A more verbose description, for humans reading this
         conda: envs/conda.yaml
 
+entrypoints:
+  ids: ids.py
+  normalize: normalize.py
+  feat-select: feat-select.py
+  pca: pca.py
+  
 # Stages and modules for your benchmark
 
 stages:
