@@ -27,58 +27,34 @@ entrypoints:
 # Stages and modules for your benchmark
 
 stages:
-  - id: datasets
+  - id: DATA
     outputs:
-        - id: data.matrix
-          path: "{dataset}.data.gz"
-        - id: data.true_labels
-          path: "{dataset}.gz"
+      - id: rawdata_h5ad
+        path: "local_data.h5ad"
     modules:
-      - id: dataset_loader
-        name: "loads the benchmark datasets"
-        software_environment: "conda_env"
+      - id: local_data
+        name: "Local H5AD input"
+        software_environment: conda_env
         repository:
-          url: https://github.com/CHANGEME/data_loader
-          commit: 366c5a2
-        parameters:
-            # A single parameter dict
-            - param1: "value"
-              param2: "other_value"
-
-            # A combinatorial grid expansion
-            - param1: "value"
-              param2: ["1", "2", "3"]
-
-  - id: methods
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: main
+          entrypoint: data
+  
+  - id: IDS
     inputs:
-        - data.matrix
-        - data.true_labels
+      - rawdata_h5ad
     outputs:
-      - id: clustering.predicted
-        path: "{dataset}_predicted.labels.gz"
-    modules:
-      - id: cool_method_1
-        name: "the only method you will ever need"
-        software_environment: "conda_env"
-        repository:
-          url: https://github.com/CHANGEME/my_method
-          commit: deadbeef
-        parameters:
-          - param1: "value"
+      - id: filtered_cellids
+        path: "{name}_cellids.txt.gz"
+      - id: filtered_featureids
+        path: "{name}_featureids.txt.gz"
 
-  - id: metrics
-    inputs:
-        - clustering.predicted
-        - data.true_labels
-    outputs:
-      - id: metrics.scores
-        path: "{dataset}.scores.gz"
     modules:
-      - id: strict_metric_1
-        name: "a very well defined metric"
-        software_environment: "conda_env"
+      - id: identity_ids
+        name: "Keep all cells and genes"
+        software_environment: conda_env
         repository:
-          url: https://github.com/CHANGEME/the_right_metric
-          commit: c0ffee
-        parameters:
-          - foo: "bar"
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
+          commit: 99eef635f178a1bc6ca78adb6e1287f159b817b3
+          entrypoint: ids
+  
