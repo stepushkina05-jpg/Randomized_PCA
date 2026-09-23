@@ -19,7 +19,7 @@ software_environments:
         conda: envs/conda.yaml
 
 entrypoints:
-  ids: ids.py
+  data: raw_h5ad.py
   normalize: normalize.py
   feat-select: feat-select.py
   pca: pca.py
@@ -37,7 +37,7 @@ stages:
         software_environment: conda_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: main
+          commit: 2308c469376c20e443705bbfeccc03c9276a066e
           entrypoint: data
   
   - id: IDS
@@ -55,6 +55,6 @@ stages:
         software_environment: conda_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
-          commit: 99eef635f178a1bc6ca78adb6e1287f159b817b3
+          commit: b73fc3202e208151655734bc9a411af32f3c96e4
           entrypoint: ids
   
