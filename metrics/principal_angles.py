@@ -110,9 +110,9 @@ def main():
     parser.add_argument("--selected_k", nargs="+", required=True)
 
     args, _ = parser.parse_known_args()
-    pca_loadings = [Path(path) for path in args.pca_loadings if str(path).endswith("_loadings.tsv")]
+    pca_loading_paths = [Path(path) for path in args.pca_loadings if str(path).endswith("_loadings.tsv")]
+    selected_k_paths = [Path(path) for path in args.selected_k if str(path).endswith("_smallest_eigengaps.tsv")]
 
-    selected_k_files = [ Path(path) for path in args.selected_k if str(path).endswith("_smallest_eigengaps.tsv")]
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -120,7 +120,7 @@ def main():
     exact_files = {}
     random_files = {}
 
-    for path in pca_loadings:
+    for path in pca_loading_paths:
         module = get_pca_module(path)
         method, pca_type = get_method_and_type(module)
 
@@ -134,7 +134,7 @@ def main():
 #selected values from eigenvalue gap metric 
     selected_k_files = {}
 
-    for path in selected_k_files:
+    for path in selected_k_paths:
         module = get_pca_module(path)
         method, pca_type = get_method_and_type(module)
         if pca_type != "exact":
