@@ -75,7 +75,6 @@ def plot_spectral_gaps(gaps, smallest, output_file):
     plt.tight_layout()
     plt.savefig(output_file, dpi=300)
     plt.close()
-
 def main():
     parser = argparse.ArgumentParser(description="Compute relative eigengaps from exact PCA scores.")
     parser.add_argument("--output_dir", required=True)

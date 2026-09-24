@@ -1,0 +1,2 @@
+entrypoints:
+  eigengap: metrics/eigengap.py
