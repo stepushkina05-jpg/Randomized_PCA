@@ -59,6 +59,11 @@ def get_pca_module(path):
     i = parts.index("PCA")
     return parts[i + 1]
 
+def get_dataset(path: Path):
+    parts = path.parts
+    if "DATA" not in parts:
+        raise ValueError(f"Could not identify dataset from {path}")
+    return parts[parts.index("DATA") + 1]
 
 def get_method_and_type(module):
     if module.endswith("_exact"):
@@ -120,6 +125,7 @@ def main():
     pca_manifest = []
 
     for path in pca_score_paths:
+        dataset = get_dataset(path)
         module = get_pca_module(path)
         method, pca_type = get_method_and_type(module)
 
@@ -129,6 +135,7 @@ def main():
             seed = get_random_seed(path)
 
         pca_manifest.append({
+            "dataset": dataset,
             "method": method,
             "pca_type": pca_type,
             "seed": seed,
@@ -147,13 +154,15 @@ def main():
     for path in pca_loading_paths:
         module = get_pca_module(path)
         method, pca_type = get_method_and_type(module)
+        dataset = get_dataset(path)
+        key = (dataset, method)
 
         if pca_type == "exact":
-            if method in exact_files:
-                raise ValueError(f"Multiple exact PCA files found for {method}")
-            exact_files[method] = Path(path)
+            if key in exact_files:
+                raise ValueError(f"Multiple exact PCA files found for {key}")
+            exact_files[key] = Path(path)
         else:
-            random_files.setdefault(method, []).append(Path(path))
+            random_files.setdefault(key, []).append(Path(path))
 
 #selected values from eigenvalue gap metric 
     selected_k_files = {}
@@ -161,43 +170,61 @@ def main():
     for path in selected_k_paths:
         module = get_pca_module(path)
         method, pca_type = get_method_and_type(module)
+        dataset = get_dataset(path)
+        key = (dataset, method)
+
         if pca_type != "exact":
             raise ValueError(f"selected_k must originate from exact PCA, got {module}")
-        selected_k_files[method] = Path(path)
+        if key in selected_k_files:
+            raise ValueError(f"Multiple selected-k files found for {key}")
+
+        selected_k_files[key] = Path(path)
 
 #compute subspace errors using angles from above
     results = []
-    for method, exact_file in exact_files.items():
-        if method not in random_files:
-            raise ValueError(f"No randomized PCA files found for {method}")
-        if method not in selected_k_files:
-            raise ValueError(f"No selected-k file found for {method}")
+
+    for (dataset, method), exact_file in exact_files.items():
+        key = (dataset, method)
+
+        if key not in random_files:
+            raise ValueError(f"No randomized PCA files found for {key}")
+        if key not in selected_k_files:
+            raise ValueError(f"No selected-k file found for {key}")
+
         exact = load_loadings(exact_file)
-        selected = pd.read_csv(selected_k_files[method], sep="\t")
+        selected = pd.read_csv(selected_k_files[key], sep="\t")
         selected_k = selected["k"].astype(int).tolist()
-        print(f"\n{method}")
+
+        print(f"\n{dataset} / {method}")
         print(f"Exact: {exact_file}")
         print(f"Selected k: {selected_k}")
-        print(f"Randomized runs: {len(random_files[method])}")
-        for random_file in random_files[method]:
+        print(f"Randomized runs: {len(random_files[key])}")
+
+        for random_file in random_files[key]:
             seed = get_random_seed(random_file)
             randomized = load_loadings(random_file)
+
             if set(exact.index) != set(randomized.index):
-                raise ValueError(f"Genes differ between exact and randomized PCA for " f"{method}, seed {seed}")
+                raise ValueError(f"Genes differ between exact and randomized PCA for {dataset}, {method}, seed {seed}")
+
             randomized = randomized.loc[exact.index]
+
             for k in selected_k:
                 error, max_angle = compute_subspace_error(exact, randomized, k)
+
                 results.append({
+                    "dataset": dataset,
                     "method": method,
                     "seed": seed,
                     "k": k,
                     "subspace_error": error,
-                    "max_angle_deg": max_angle})
+                    "max_angle_deg": max_angle
+                })
 
-    results = pd.DataFrame(results).sort_values(["method", "k", "seed"])
+    results = pd.DataFrame(results).sort_values(["dataset", "method", "k", "seed"])
 #selecting best/median/worst seeds 
     selected_rows = []
-    for (method, k), subset in results.groupby(["method", "k"]):
+    for (method, k), subset in results.groupby(["dataset", "method", "k"]):
         best = subset.loc[subset["subspace_error"].idxmin()]
         worst = subset.loc[subset["subspace_error"].idxmax()]
         median_value = subset["subspace_error"].median()
@@ -205,6 +232,7 @@ def main():
 
         for label, row in [("best", best), ("median", median), ("worst", worst)]:
             selected_rows.append({
+                "dataset": dataset,
                 "method": method,
                 "k": int(k),
                 "selection": label,

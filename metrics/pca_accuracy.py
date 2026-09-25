@@ -43,6 +43,11 @@ def get_pca_module(path: Path):
 
     return parts[parts.index("PCA") + 1]
 
+def get_dataset(path: Path):
+    parts = path.parts
+    if "DATA" not in parts:
+        raise ValueError(f"Could not identify dataset from {path}")
+    return parts[parts.index("DATA") + 1]
 
 def get_method_and_type(module: str):
     if module.endswith("_exact"):
@@ -84,7 +89,7 @@ def align_table(df: pd.DataFrame, ids, name):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--pca_files", "--pca_loadings", dest="pca_files", nargs="+", required=True)
-    parser.add_argument("--matrix_h5", "--normalized_selected_h5", required=True)
+    parser.add_argument("--matrix_h5", "--normalized_selected_h5", dest="matrix_h5", nargs="+", required=True)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--name", required=True)
     args = parser.parse_args()
@@ -104,11 +109,13 @@ def main():
         if score_path.parent not in loading_by_dir:
             raise ValueError(f"No loading file found for {score_path}")
 
+        dataset = get_dataset(score_path)
         module = get_pca_module(score_path)
         method, pca_type = get_method_and_type(module)
         params = get_parameters(score_path)
 
         runs.append({
+            "dataset": dataset,
             "method": method,
             "pca_type": pca_type,
             "score_file": score_path,
@@ -122,14 +129,20 @@ def main():
         if run["pca_type"] != "exact":
             continue
 
-        method = run["method"]
+        key = (run["dataset"], run["method"])
 
-        if method in exact_runs:
-            raise ValueError(f"Multiple exact PCA runs found for {method}")
+        if key in exact_runs:
+            raise ValueError(f"Multiple exact PCA runs found for {key}")
 
-        exact_runs[method] = run
+        exact_runs[key] = run
 
-    X, cell_ids, gene_ids = load_matrix(Path(args.matrix_h5))
+    matrix_files = {}
+    for path in args.matrix_h5:
+        path = Path(path)
+        dataset = get_dataset(path)
+        if dataset in matrix_files:
+            raise ValueError(f"Multiple input matrices found for {dataset}")
+        matrix_files[dataset] = path
 
     accuracy_rows = []
     correlation_rows = []
@@ -137,13 +150,15 @@ def main():
     for run in runs:
         if run["pca_type"] != "random":
             continue
-
+        dataset = run["dataset"]
         method = run["method"]
-
-        if method not in exact_runs:
-            raise ValueError(f"No exact PCA run found for {method}")
-
-        exact = exact_runs[method]
+        key = (dataset, method)
+        if key not in exact_runs:
+            raise ValueError(f"No exact PCA run found for {key}")
+        if dataset not in matrix_files:
+            raise ValueError(f"No input matrix found for {dataset}")
+        exact = exact_runs[key]
+        X, cell_ids, gene_ids = load_matrix(matrix_files[dataset])
 
         exact_scores = align_table(load_pca_table(exact["score_file"]), cell_ids, "Exact score")
         random_scores = align_table(load_pca_table(run["score_file"]), cell_ids, "Random score")
@@ -171,12 +186,11 @@ def main():
         exact_error = np.linalg.norm(X - X_exact, ord=2)
         random_error = np.linalg.norm(X - X_random, ord=2)
         approximation_quality = exact_error / random_error
-
         params = run["params"]
         seed = params.get("random_seed", "")
         n_iter = params.get("n_iter", "")
         n_oversamples = params.get("n_oversamples", "")
-        dataset = run["score_file"].name.removesuffix("_pcas.tsv")
+
 
         accuracy_rows.append({
             "dataset": dataset,

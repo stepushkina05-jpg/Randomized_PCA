@@ -20,7 +20,10 @@ def load_graph(path: Path):
         distances = csr_matrix((data, indices, indptr), shape=(n, n))
 
         conn = h5["connectivities"]
-        connectivities = csr_matrix((conn["data"][:], conn["indices"][:], conn["indptr"][:]), shape=(n, n))
+        connectivities = csr_matrix(
+            (conn["data"][:], conn["indices"][:], conn["indptr"][:]),
+            shape=(n, n),
+        )
 
     return distances, connectivities, cell_ids
 
@@ -37,12 +40,21 @@ def compare_graphs(graph_a: Path, graph_b: Path):
     for i in range(A.shape[0]):
         neighbors_a = set(A.indices[A.indptr[i]:A.indptr[i + 1]])
         neighbors_b = set(B.indices[B.indptr[i]:B.indptr[i + 1]])
-        neighbor_retention.append(len(neighbors_a & neighbors_b) / len(neighbors_a))
+
+        if len(neighbors_a) == 0:
+            raise ValueError(f"Exact graph contains no neighbors for cell index {i}.")
+
+        neighbor_retention.append(
+            len(neighbors_a & neighbors_b) / len(neighbors_a)
+        )
 
     neighbor_retention = np.asarray(neighbor_retention)
 
     diff = WA - WB
-    connectivity_error = np.sqrt(diff.power(2).sum()) / np.sqrt(WA.power(2).sum())
+    connectivity_error = (
+        np.sqrt(diff.power(2).sum())
+        / np.sqrt(WA.power(2).sum())
+    )
 
     return neighbor_retention, connectivity_error
 
@@ -55,15 +67,36 @@ def main():
     args = parser.parse_args()
 
     manifest = pd.read_csv(args.selected_knn_manifest, sep="\t")
+
+    required = {
+        "dataset",
+        "method",
+        "k",
+        "selection",
+        "pca_seed",
+        "neighbors_file",
+    }
+
+    if not required.issubset(manifest.columns):
+        raise ValueError(
+            f"selected_knn_manifest must contain columns {sorted(required)}"
+        )
+
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+
     results = []
 
-    for (method, k), group in manifest.groupby(["method", "k"]):
+    for (dataset, method, k), group in manifest.groupby(
+        ["dataset", "method", "k"]
+    ):
         exact_rows = group[group["selection"] == "exact"]
 
         if len(exact_rows) != 1:
-            raise ValueError(f"Expected exactly one exact graph for {method}, k={k}")
+            raise ValueError(
+                f"Expected exactly one exact graph for "
+                f"{dataset}, {method}, k={k}"
+            )
 
         exact_graph = Path(exact_rows.iloc[0]["neighbors_file"])
 
@@ -71,13 +104,21 @@ def main():
             random_rows = group[group["selection"] == selection]
 
             if len(random_rows) != 1:
-                raise ValueError(f"Expected exactly one {selection} graph for {method}, k={k}")
+                raise ValueError(
+                    f"Expected exactly one {selection} graph for "
+                    f"{dataset}, {method}, k={k}"
+                )
 
             row = random_rows.iloc[0]
             random_graph = Path(row["neighbors_file"])
-            retention, connectivity_error = compare_graphs(exact_graph, random_graph)
+
+            retention, connectivity_error = compare_graphs(
+                exact_graph,
+                random_graph,
+            )
 
             results.append({
+                "dataset": dataset,
                 "method": method,
                 "k": int(k),
                 "selection": selection,
@@ -89,8 +130,11 @@ def main():
             })
 
     results = pd.DataFrame(results)
-    output_file = output_dir / f"{args.name}_knn_overlap.tsv"
+    results = results.sort_values(
+        ["dataset", "method", "k", "selection"]
+    )
 
+    output_file = output_dir / f"{args.name}_knn_overlap.tsv"
     results.to_csv(output_file, sep="\t", index=False)
 
     print()

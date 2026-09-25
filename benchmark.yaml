@@ -35,17 +35,38 @@ stages:
   - id: DATA
     outputs:
       - id: rawdata_h5ad
-        path: "local_data.h5ad"
+        path: "{name}.h5ad"
       - id: properties_info
-        path: "local_data_properties.yaml"
+        path: "{name}_properties.yaml"
+
     modules:
-      - id: local_data
-        name: "Local H5AD input"
-        software_environment: scanpy_env
+      - id: p31_s42_narrow_signal
+        name: "p31 s42 narrow signal"
+        software_environment: scrapper_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/input_data
-          commit: 2308c469376c20e443705bbfeccc03c9276a066e
-          entrypoint: data
+          url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
+          commit: a84f4d04ffdfbb597cedee4d4c99f0d19951620a
+          entrypoint: default
+        parameters:
+          - dataset_name: p31_s42_narrow_signal
+      - id: p35_s42_broad_signal
+        name: "p35 s42 broad signal"
+        software_environment: scrapper_env
+        repository:
+          url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
+          commit: a84f4d04ffdfbb597cedee4d4c99f0d19951620a
+          entrypoint: default
+        parameters:
+          - dataset_name: p35_s42_broad_signal
+      - id: p38_s42_strong_signal
+        name: "p38 s42 strong signal"
+        software_environment: scrapper_env
+        repository:
+          url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
+          commit: a84f4d04ffdfbb597cedee4d4c99f0d19951620a
+          entrypoint: default
+        parameters:
+          - dataset_name: p38_s42_strong_signal
   
   - id: IDS
     inputs:
@@ -61,8 +82,8 @@ stages:
         name: "Keep all cells and genes"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
-          commit: 28a3318c7fa30aedc877b7a29511f298185b710c
+          url: https://github.com/stepushkina05-jpg/scanpy_random
+          commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
           entrypoint: ids
   
   - id: NORM
@@ -78,8 +99,8 @@ stages:
         name: "Scanpy CP10k log1p normalization"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
-          commit: 361f91be9c99ddd88ca48cd69742f0c77a3a0ccc
+          url: https://github.com/stepushkina05-jpg/scanpy_random
+          commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
           entrypoint: normalize
         parameters:
           - flavor: log1pCP10k
@@ -120,8 +141,8 @@ stages:
       name: "Scanpy exact PCA"
       software_environment: scanpy_env
       repository:
-        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
-        commit: f17bae66b3a428658b712415f1abbc7d741518d5
+        url: https://github.com/stepushkina05-jpg/scanpy_random
+        commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
         entrypoint: pca
       parameters:
         - solver: full
@@ -137,8 +158,8 @@ stages:
       name: "Scanpy randomized PCA"
       software_environment: scanpy_env
       repository:
-        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
-        commit: f17bae66b3a428658b712415f1abbc7d741518d5
+        url: https://github.com/stepushkina05-jpg/scanpy_random
+        commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
         entrypoint: pca
       parameters:
         - &scanpy_random_base
@@ -182,8 +203,8 @@ stages:
       name: "Scrapper randomized PCA"
       software_environment: scrapper_env
       repository:
-        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scrapper_random
-        commit: 27797a1cb4d5ccb0a53468b6207c4a4ea5e7642d
+        url: https://github.com/stepushkina05-jpg/scrapper_random
+        commit: 51a6fcadf67421ee3ff4dc6277cb0145d834aa8b
         entrypoint: pca
       parameters:
         - solver: random
@@ -196,8 +217,8 @@ stages:
       name: "Scrapper exact PCA"
       software_environment: scrapper_env
       repository:
-        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scrapper_random
-        commit: 27797a1cb4d5ccb0a53468b6207c4a4ea5e7642d
+        url: https://github.com/stepushkina05-jpg/scrapper_random
+        commit: 51a6fcadf67421ee3ff4dc6277cb0145d834aa8b
         entrypoint: pca
       parameters:
         - solver: exact
@@ -252,20 +273,18 @@ metric_collectors:
 
   
   - id: pca_accuracy
+    name: "PCA approximation accuracy"
+    software_environment: scanpy_env
+    repository:
+      url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+      commit: 066581ec753b31161fa23f5a1d56fd2cb0064d52
+      entrypoint: pca-accuracy
     inputs:
       - pca_loadings
       - normalized_selected_h5
     outputs:
       - id: approximation_accuracy
-        path: "approximation_accuracy.tsv"
+        path: "{name}/approximation_accuracy.tsv"
       - id: pc_correlations
-        path: "pc_correlations.tsv"
-    modules:
-      - id: pca_accuracy
-        name: "PCA approximation accuracy"
-        software_environment: scanpy_env
-        repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: YOUR_NEW_HASH
-          entrypoint: pca-accuracy
+        path: "{name}/pc_correlations.tsv"
       

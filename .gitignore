@@ -28,6 +28,7 @@ wheels/
 .env
 .venv
 env/
+envs/
 venv/
 ENV/
 
@@ -53,3 +54,17 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# CSV files
+
+*.csv
+
+# Input matrices 
+*.h5
+
+#Figures 
+
+*.png
+
+#Time stamps
+*.tsv

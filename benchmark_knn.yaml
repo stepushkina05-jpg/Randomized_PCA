@@ -82,8 +82,8 @@ stages:
         name: "Leiden clustering of selected kNN graphs"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
-          commit: 1fed6d9411ffe4a5f6d566fb1038e5f152d5d6fd
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: 616670867f361c61982579356191d940c2039636
           entrypoint: selected-clustering
         parameters:
           - resolution: 1.0
@@ -103,5 +103,5 @@ stages:
         software_environment: scanpy_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: YOUR_NEW_HASH
+          commit: 48a8236122b30501184bdb8ad8ff815137cb62d9
           entrypoint: clustering-ari

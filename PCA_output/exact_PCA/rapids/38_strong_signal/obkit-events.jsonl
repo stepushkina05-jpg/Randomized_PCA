@@ -1,0 +1,12 @@
+{"ts":"2026-09-21T12:44:35.810Z","event":"load","phase":"start","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:35.845Z","event":"load","phase":"end","pid":1835542,"host":"rolandgarros","attrs":{"n_cells":2000,"n_genes":2000}}
+{"ts":"2026-09-21T12:44:35.845Z","event":"gpu_upload","phase":"start","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:35.859Z","event":"gpu_upload","phase":"end","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:35.859Z","event":"compute","phase":"start","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:36.180Z","event":"compute","phase":"end","pid":1835542,"host":"rolandgarros","attrs":{"n_components":50,"solver":"rapids-exact","random_seed":1}}
+{"ts":"2026-09-21T12:44:36.180Z","event":"gpu_download","phase":"start","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:36.182Z","event":"gpu_download","phase":"end","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:36.182Z","event":"write","phase":"start","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:36.324Z","event":"write","phase":"end","pid":1835542,"host":"rolandgarros","attrs":{"path":"test_results/rapids_exact/p38_s42_strong_signal/p38_s42_strong_signal_exact_pcas.tsv"}}
+{"ts":"2026-09-21T12:44:36.324Z","event":"write_loadings","phase":"start","pid":1835542,"host":"rolandgarros"}
+{"ts":"2026-09-21T12:44:36.475Z","event":"write_loadings","phase":"end","pid":1835542,"host":"rolandgarros","attrs":{"path":"test_results/rapids_exact/p38_s42_strong_signal/p38_s42_strong_signal_exact_loadings.tsv"}}
