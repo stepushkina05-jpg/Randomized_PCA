@@ -237,7 +237,7 @@ metric_collectors:
     software_environment: scanpy_env
     repository:
       url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-      commit: 3e86d6a75829784837cadafd39977c51558f2b39
+      commit: 5024f885a5cbf06fb5ce6e3df3ace63d3be64734
       entrypoint: principal_angles
     inputs:
       - pca_loadings
@@ -249,4 +249,23 @@ metric_collectors:
         path: "{name}/selected_seeds.tsv"
       - id: pca_manifest
         path: "{name}/pca_manifest.tsv"
+
+  
+  - id: pca_accuracy
+    inputs:
+      - pca_loadings
+      - normalized_selected_h5
+    outputs:
+      - id: approximation_accuracy
+        path: "approximation_accuracy.tsv"
+      - id: pc_correlations
+        path: "pc_correlations.tsv"
+    modules:
+      - id: pca_accuracy
+        name: "PCA approximation accuracy"
+        software_environment: scanpy_env
+        repository:
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: YOUR_NEW_HASH
+          entrypoint: pca-accuracy
       
