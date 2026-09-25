@@ -2,3 +2,4 @@ entrypoints:
   eigengap: metrics/eigengap.py
   principal_angles: metrics/principal_angles.py
   knn: knn.py
+  knn-inputs: knn_inputs.py

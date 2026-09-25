@@ -1,0 +1,52 @@
+name: knn_best_worst_seed
+id: knn_best_worst_seed
+description: Collecting 5 smallest eigenvalue gaps and corresponding PCs, according subspace errors and seeds that correspond to the best/worst subspace error at a given PC
+benchmarker: "Diana Stepushkina <stepushkina.05@gmail.com>"
+version: "0.1.0"
+
+software_backend: "conda"
+
+software_environments:
+  scanpy_env:
+    name: Scanpy environment
+    conda: envs/scanpy.yaml
+
+stages:
+
+  - id: KNN_INPUT
+    outputs:
+      - id: selected_seeds
+        path: "selected_seeds.tsv"
+      - id: pca_manifest
+        path: "pca_manifest.tsv"
+
+    modules:
+      - id: local_knn_inputs
+        name: "Existing principal-angle outputs"
+        software_environment: scanpy_env
+        repository:
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: 78b840ce733609ecad1ee796f7cfc719aceda415
+          entrypoint: knn-inputs
+
+  - id: KNN
+    inputs:
+      - selected_seeds
+      - pca_manifest
+
+    outputs:
+      - id: selected_knn_manifest
+        path: "{dataset}_selected_knn_manifest.tsv"
+
+    modules:
+      - id: selected_knn
+        name: "Selected exact/best/worst kNN graphs"
+        software_environment: scanpy_env
+        repository:
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: 2fcc6886a3ed0f16fa3c91a72692184f249a24a7
+          entrypoint: knn
+        parameters:
+          - n_neighbors: 15
+            flavor: umap
+            random_seed: 1
