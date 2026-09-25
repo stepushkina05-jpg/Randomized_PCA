@@ -3,3 +3,4 @@ entrypoints:
   principal_angles: metrics/principal_angles.py
   knn: knn.py
   knn-inputs: knn_inputs.py
+  knn-overlap: metrics/knn_overlap.py

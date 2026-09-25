@@ -26,8 +26,11 @@ stages:
         software_environment: scanpy_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 78b840ce733609ecad1ee796f7cfc719aceda415
+          commit: db0f185896ec385309775c61e87909d9147e7d38
           entrypoint: knn-inputs
+        parameters:
+          - selected_seeds_source: "principal_angles/selected_seeds.tsv"
+            pca_manifest_source: "principal_angles/pca_manifest.tsv"
 
   - id: KNN
     inputs:
@@ -44,9 +47,24 @@ stages:
         software_environment: scanpy_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 2fcc6886a3ed0f16fa3c91a72692184f249a24a7
+          commit: db0f185896ec385309775c61e87909d9147e7d38
           entrypoint: knn
         parameters:
           - n_neighbors: 15
             flavor: umap
             random_seed: 1
+  - id: KNN_OVERLAP
+    inputs:
+      - selected_knn_manifest
+    outputs:
+      - id: knn_overlap
+        path: "{dataset}_knn_overlap.tsv"
+
+    modules:
+      - id: knn_overlap
+        name: "kNN overlap with exact PCA"
+        software_environment: scanpy_env
+        repository:
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: YOUR_CURRENT_HASH
+          entrypoint: knn-overlap
