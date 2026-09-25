@@ -4,3 +4,4 @@ entrypoints:
   knn: knn.py
   knn-inputs: knn_inputs.py
   knn-overlap: metrics/knn_overlap.py
+  selected-clustering: selected_clustering.py

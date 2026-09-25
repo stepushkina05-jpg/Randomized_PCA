@@ -26,7 +26,7 @@ stages:
         software_environment: scanpy_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: db0f185896ec385309775c61e87909d9147e7d38
+          commit: 3abdcebadcce5f95692439a669140106da4f32fd
           entrypoint: knn-inputs
         parameters:
           - selected_seeds_source: "principal_angles/selected_seeds.tsv"
@@ -47,7 +47,7 @@ stages:
         software_environment: scanpy_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: db0f185896ec385309775c61e87909d9147e7d38
+          commit: 3abdcebadcce5f95692439a669140106da4f32fd
           entrypoint: knn
         parameters:
           - n_neighbors: 15
@@ -66,5 +66,25 @@ stages:
         software_environment: scanpy_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: YOUR_CURRENT_HASH
+          commit: 3abdcebadcce5f95692439a669140106da4f32fd
           entrypoint: knn-overlap
+
+  - id: CLUSTERING
+    inputs:
+      - selected_knn_manifest
+
+    outputs:
+      - id: selected_clustering_manifest
+        path: "{dataset}_selected_clustering_manifest.tsv"
+
+    modules:
+      - id: selected_clustering
+        name: "Leiden clustering of selected kNN graphs"
+        software_environment: scanpy_env
+        repository:
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: YOUR_NEW_HASH
+          entrypoint: selected-clustering
+        parameters:
+          - resolution: 1.0
+            random_seed: 1
