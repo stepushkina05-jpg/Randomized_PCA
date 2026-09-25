@@ -32,6 +32,10 @@ subspace_errors.tsv
 
 selected_seeds.tsv
     Best, median and worst randomized seed for every implementation and k.
+
+pca_manifest.tsv
+    Exact and randomized PCA score files together with implementation,
+    PCA type and random seed, for downstream selected kNN construction.
 """
 
 from pathlib import Path
@@ -111,12 +115,32 @@ def main():
 
     args, _ = parser.parse_known_args()
     pca_loading_paths = [Path(path) for path in args.pca_loadings if str(path).endswith("_loadings.tsv")]
+    pca_score_paths = [Path(path) for path in args.pca_loadings if str(path).endswith("_pcas.tsv")]
     selected_k_paths = [Path(path) for path in args.selected_k if str(path).endswith("_smallest_eigengaps.tsv")]
+    pca_manifest = []
 
+    for path in pca_score_paths:
+        module = get_pca_module(path)
+        method, pca_type = get_method_and_type(module)
+
+        if pca_type == "exact":
+            seed = ""
+        else:
+            seed = get_random_seed(path)
+
+        pca_manifest.append({
+            "method": method,
+            "pca_type": pca_type,
+            "seed": seed,
+            "pca_file": str(path),
+        })
+
+    pca_manifest = pd.DataFrame(pca_manifest)
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-#exclude exact 
+#file lookup
+#loadings 
     exact_files = {}
     random_files = {}
 
@@ -191,13 +215,18 @@ def main():
     selected_seeds = pd.DataFrame(selected_rows)
     errors_file = output_dir / "subspace_errors.tsv"
     selected_file = output_dir / "selected_seeds.tsv"
+    manifest_file = output_dir / "pca_manifest.tsv"
+
     results.to_csv(errors_file, sep="\t", index=False)
     selected_seeds.to_csv(selected_file, sep="\t", index=False)
+    pca_manifest.to_csv(manifest_file, sep="\t", index=False)
+
     print("\nSelected seeds")
     print("--------------")
     print(selected_seeds.to_string(index=False))
     print(f"\nWrote: {errors_file}")
     print(f"Wrote: {selected_file}")
+    print(f"Wrote: {manifest_file}")
 
 
 if __name__ == "__main__":

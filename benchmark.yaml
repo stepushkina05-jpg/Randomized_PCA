@@ -13,10 +13,15 @@ software_backend: "conda"
 # Available software environments
 
 software_environments:
-    conda_env:
-        name: nicely packaged environment
-        description: A more verbose description, for humans reading this
-        conda: envs/conda.yaml
+  scanpy_env:
+    name: Scanpy environment
+    description: Environment for Scanpy preprocessing and PCA
+    conda: envs/scanpy.yaml
+
+  scrapper_env:
+    name: Scrapper environment
+    description: Environment for Scrapper PCA
+    conda: envs/scrapper.yaml
 
 entrypoints:
   data: raw_h5ad.py
@@ -31,12 +36,14 @@ stages:
     outputs:
       - id: rawdata_h5ad
         path: "local_data.h5ad"
+      - id: properties_info
+        path: "local_data_properties.yaml"
     modules:
       - id: local_data
         name: "Local H5AD input"
-        software_environment: conda_env
+        software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/input_data
           commit: 2308c469376c20e443705bbfeccc03c9276a066e
           entrypoint: data
   
@@ -45,16 +52,201 @@ stages:
       - rawdata_h5ad
     outputs:
       - id: filtered_cellids
-        path: "{name}_cellids.txt.gz"
+        path: "{dataset}_cellids.txt.gz"
       - id: filtered_featureids
-        path: "{name}_featureids.txt.gz"
+        path: "{dataset}_featureids.txt.gz"
 
     modules:
       - id: identity_ids
         name: "Keep all cells and genes"
-        software_environment: conda_env
+        software_environment: scanpy_env
         repository:
           url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
-          commit: b73fc3202e208151655734bc9a411af32f3c96e4
+          commit: 28a3318c7fa30aedc877b7a29511f298185b710c
           entrypoint: ids
   
+  - id: NORM
+    inputs:
+      - rawdata_h5ad
+      - filtered_cellids
+      - filtered_featureids
+    outputs:
+      - id: normalized_h5
+        path: "{dataset}_normalized.h5"
+    modules:
+      - id: norm_scanpy
+        name: "Scanpy CP10k log1p normalization"
+        software_environment: scanpy_env
+        repository:
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
+          commit: 361f91be9c99ddd88ca48cd69742f0c77a3a0ccc
+          entrypoint: normalize
+        parameters:
+          - flavor: log1pCP10k
+
+  - id: FEAT
+    inputs:
+      - rawdata_h5ad
+      - normalized_h5
+      - filtered_cellids
+      - filtered_featureids
+      - properties_info
+    outputs:
+      - id: normalized_selected_h5
+        path: "{dataset}_normalized_selected.h5"
+    modules:
+      - id: feat_scanpy
+        name: "Scanpy Seurat HVG selection"
+        software_environment: scanpy_env
+        repository:
+          url: https://github.com/omni-scrna/scanpy
+          commit: 2a56c14
+          entrypoint: feat-select
+        parameters:
+          - flavor: scanpy_seurat
+            number_selected: 2000
+
+  - id: PCA
+    inputs:
+      - normalized_selected_h5
+    outputs:
+      - id: pca_scores
+        path: "{dataset}_pcas.tsv"
+      - id: pca_loadings
+        path: "{dataset}_loadings.tsv"
+
+    modules:
+    - id: scanpy_exact
+      name: "Scanpy exact PCA"
+      software_environment: scanpy_env
+      repository:
+        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
+        commit: f17bae66b3a428658b712415f1abbc7d741518d5
+        entrypoint: pca
+      parameters:
+        - solver: full
+          dense: "true"
+          dtype: float64
+          blas_threads: 1
+          n_components: 50
+          random_seed: 1
+          n_iter: 2
+          n_oversamples: 10
+
+    - id: scanpy_random
+      name: "Scanpy randomized PCA"
+      software_environment: scanpy_env
+      repository:
+        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scanpy_random
+        commit: f17bae66b3a428658b712415f1abbc7d741518d5
+        entrypoint: pca
+      parameters:
+        - &scanpy_random_base
+          solver: randomized
+          dense: "true"
+          dtype: float64
+          blas_threads: 1
+          n_components: 50
+          random_seed: 1
+          n_iter: 2
+          n_oversamples: 10
+
+        - <<: *scanpy_random_base
+          random_seed: 2
+
+        - <<: *scanpy_random_base
+          random_seed: 3
+
+        - <<: *scanpy_random_base
+          random_seed: 4
+
+        - <<: *scanpy_random_base
+          random_seed: 5
+
+        - <<: *scanpy_random_base
+          random_seed: 6
+
+        - <<: *scanpy_random_base
+          random_seed: 7
+
+        - <<: *scanpy_random_base
+          random_seed: 8
+
+        - <<: *scanpy_random_base
+          random_seed: 9
+
+        - <<: *scanpy_random_base
+          random_seed: 10
+          
+    - id: scrapper_random
+      name: "Scrapper randomized PCA"
+      software_environment: scrapper_env
+      repository:
+        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scrapper_random
+        commit: 27797a1cb4d5ccb0a53468b6207c4a4ea5e7642d
+        entrypoint: pca
+      parameters:
+        - solver: random
+          n_components: 50
+          n_iter: 2
+          n_oversamples: 10
+          random_seed: 1
+          num_threads: 1
+    - id: scrapper_exact
+      name: "Scrapper exact PCA"
+      software_environment: scrapper_env
+      repository:
+        url: /Users/dianastepushkina/Desktop/randomized_benchmark/scrapper_random
+        commit: 27797a1cb4d5ccb0a53468b6207c4a4ea5e7642d
+        entrypoint: pca
+      parameters:
+        - solver: exact
+          n_components: 50
+          n_iter: 2
+          n_oversamples: 10
+          random_seed: 1
+          num_threads: 1
+
+  - id: EIGENGAP
+    inputs:
+      - pca_scores
+    outputs:
+      - id: eigengaps
+        path: "{dataset}_eigengaps.tsv"
+      - id: selected_k
+        path: "{dataset}_smallest_eigengaps.tsv"
+      - id: eigengap_figure
+        path: "{dataset}_eigengaps.png"
+    modules:
+      - id: eigengap
+        name: "Exact PCA eigengap analysis"
+        software_environment: scanpy_env
+        exclude:
+        - scanpy_random
+        - scrapper_random
+        repository: 
+          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+          commit: 95c6a1f5b6fa29fa72299dcd00b1f63a3bd27a8b
+          entrypoint: eigengap 
+        parameters: 
+          - n_smallest: 5 
+
+metric_collectors:
+  - id: principal_angles
+    name: "PCA principal-angle subspace analysis"
+    software_environment: scanpy_env
+    repository:
+      url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
+      commit: 3e86d6a75829784837cadafd39977c51558f2b39
+      entrypoint: principal_angles
+    inputs:
+      - pca_loadings
+      - selected_k
+    outputs:
+      - id: subspace_errors
+        path: "{name}/subspace_errors.tsv"
+      - id: selected_seeds
+        path: "{name}/selected_seeds.tsv"
+      - id: pca_manifest
+        path: "{name}/pca_manifest.tsv"
+      
