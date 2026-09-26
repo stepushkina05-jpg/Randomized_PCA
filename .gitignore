@@ -68,3 +68,7 @@ Thumbs.db
 
 #Time stamps
 *.tsv
+
+#test
+
+/PCA_output/
