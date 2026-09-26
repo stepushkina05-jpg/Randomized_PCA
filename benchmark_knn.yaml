@@ -25,8 +25,8 @@ stages:
         name: "Existing principal-angle outputs"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 3abdcebadcce5f95692439a669140106da4f32fd
+          url: https://github.com/stepushkina05-jpg/Randomized_PCA
+          commit: 22c97e9103d6e9074adf555848acb63097e90c56
           entrypoint: knn-inputs
         parameters:
           - selected_seeds_source: "principal_angles/selected_seeds.tsv"
@@ -46,8 +46,8 @@ stages:
         name: "Selected exact/best/worst kNN graphs"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 3abdcebadcce5f95692439a669140106da4f32fd
+          url: https://github.com/stepushkina05-jpg/Randomized_PCA
+          commit: 22c97e9103d6e9074adf555848acb63097e90c56
           entrypoint: knn
         parameters:
           - n_neighbors: 15
@@ -65,8 +65,8 @@ stages:
         name: "kNN overlap with exact PCA"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 3abdcebadcce5f95692439a669140106da4f32fd
+          url: https://github.com/stepushkina05-jpg/Randomized_PCA
+          commit: 22c97e9103d6e9074adf555848acb63097e90c56
           entrypoint: knn-overlap
 
   - id: CLUSTERING
@@ -82,8 +82,8 @@ stages:
         name: "Leiden clustering of selected kNN graphs"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 616670867f361c61982579356191d940c2039636
+          url: https://github.com/stepushkina05-jpg/scanpy_random
+          commit: cf36012a56678d6fc1528883183c64142a62a8cb
           entrypoint: selected-clustering
         parameters:
           - resolution: 1.0
@@ -102,6 +102,6 @@ stages:
         name: "Clustering ARI"
         software_environment: scanpy_env
         repository:
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 48a8236122b30501184bdb8ad8ff815137cb62d9
+          url: https://github.com/stepushkina05-jpg/Randomized_PCA
+          commit: 7c97dc6221b1a2bce6f10e8b23d19dd2f6254a33
           entrypoint: clustering-ari

@@ -246,8 +246,8 @@ stages:
         - scanpy_random
         - scrapper_random
         repository: 
-          url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-          commit: 95c6a1f5b6fa29fa72299dcd00b1f63a3bd27a8b
+          url: https://github.com/stepushkina05-jpg/Randomized_PCA
+          commit: 22c97e9103d6e9074adf555848acb63097e90c56
           entrypoint: eigengap 
         parameters: 
           - n_smallest: 5 
@@ -257,8 +257,8 @@ metric_collectors:
     name: "PCA principal-angle subspace analysis"
     software_environment: scanpy_env
     repository:
-      url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-      commit: 5024f885a5cbf06fb5ce6e3df3ace63d3be64734
+      url: https://github.com/stepushkina05-jpg/Randomized_PCA
+      commit: 22c97e9103d6e9074adf555848acb63097e90c56
       entrypoint: principal_angles
     inputs:
       - pca_loadings
@@ -276,8 +276,8 @@ metric_collectors:
     name: "PCA approximation accuracy"
     software_environment: scanpy_env
     repository:
-      url: /Users/dianastepushkina/Desktop/randomized_benchmark/Randomized_PCA
-      commit: 066581ec753b31161fa23f5a1d56fd2cb0064d52
+      url: https://github.com/stepushkina05-jpg/Randomized_PCA
+      commit: 22c97e9103d6e9074adf555848acb63097e90c56
       entrypoint: pca-accuracy
     inputs:
       - pca_loadings
