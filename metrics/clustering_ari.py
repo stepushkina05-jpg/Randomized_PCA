@@ -13,7 +13,6 @@ def get_dataset(path: Path):
         raise ValueError(f"Could not identify dataset from {path}")
     return parts[parts.index("DATA") + 1]
 
-
 def load_clusters(path: Path):
     df = pd.read_csv(path, sep="\t")
 
