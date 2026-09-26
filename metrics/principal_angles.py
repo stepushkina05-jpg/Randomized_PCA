@@ -224,7 +224,7 @@ def main():
     results = pd.DataFrame(results).sort_values(["dataset", "method", "k", "seed"])
 #selecting best/median/worst seeds 
     selected_rows = []
-    for (method, k), subset in results.groupby(["dataset", "method", "k"]):
+    for (dataset, method, k), subset in results.groupby(["dataset", "method", "k"]):
         best = subset.loc[subset["subspace_error"].idxmin()]
         worst = subset.loc[subset["subspace_error"].idxmax()]
         median_value = subset["subspace_error"].median()
