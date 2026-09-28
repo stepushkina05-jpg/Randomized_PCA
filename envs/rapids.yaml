@@ -12,6 +12,8 @@ dependencies:
   - cudf=26.04.00
   - cuml=26.04.00
   - dask=2026.1.1
+  - cuvs=26.04.00
+  - cugraph= 26.04.00
   - cupy=14.1.1
   - rmm=26.04.00
   - anndata=0.13.2
