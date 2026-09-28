@@ -254,7 +254,7 @@ stages:
         gpu: 1
       repository:
         url: https://github.com/stepushkina05-jpg/rapids_random
-        commit: ed06108e97c0d57a609d321a7062e5c39233ac73
+        commit: d8f7798af13fe6008cb1ecd33d9ad9471f6241d8
         entrypoint: pca
         parameters:
         - &rapids_random_base
@@ -291,7 +291,7 @@ stages:
         gpu: 1
       repository:
         url: https://github.com/stepushkina05-jpg/rapids_random
-        commit: ed06108e97c0d57a609d321a7062e5c39233ac73
+        commit: d8f7798af13fe6008cb1ecd33d9ad9471f6241d8
         entrypoint: pca
       parameters:
         - solver: rapids-exact
