@@ -256,7 +256,7 @@ stages:
         url: https://github.com/stepushkina05-jpg/rapids_random
         commit: d8f7798af13fe6008cb1ecd33d9ad9471f6241d8
         entrypoint: pca
-        parameters:
+      parameters:
         - &rapids_random_base
           solver: rapids-randomized
           n_components: *pca_n_components
