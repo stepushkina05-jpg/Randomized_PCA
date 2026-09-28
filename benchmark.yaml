@@ -23,6 +23,11 @@ software_environments:
     description: Environment for Scrapper PCA
     conda: envs/scrapper.yaml
 
+  rapids_env:
+    name: Rapids singlecell environment
+    description: Environment for Rapids singlecell PCA
+    conda: envs/rapids.yaml
+
 entrypoints:
   data: raw_h5ad.py
   normalize: normalize.py
@@ -167,37 +172,29 @@ stages:
           dense: "true"
           dtype: float64
           blas_threads: 1
-          n_components: 50
-          random_seed: 1
-          n_iter: 2
-          n_oversamples: 10
+          n_components: &pca_n_components 50
+          random_seed: &pca_seed_1 1
+          n_iter: &pca_n_iter 2
+          n_oversamples: &pca_n_oversamples 10
 
         - <<: *scanpy_random_base
-          random_seed: 2
-
+          random_seed: &pca_seed_2 2
         - <<: *scanpy_random_base
-          random_seed: 3
-
+          random_seed: &pca_seed_3 3
         - <<: *scanpy_random_base
-          random_seed: 4
-
+          random_seed: &pca_seed_4 4
         - <<: *scanpy_random_base
-          random_seed: 5
-
+          random_seed: &pca_seed_5 5
         - <<: *scanpy_random_base
-          random_seed: 6
-
+          random_seed: &pca_seed_6 6
         - <<: *scanpy_random_base
-          random_seed: 7
-
+          random_seed: &pca_seed_7 7
         - <<: *scanpy_random_base
-          random_seed: 8
-
+          random_seed: &pca_seed_8 8
         - <<: *scanpy_random_base
-          random_seed: 9
-
+          random_seed: &pca_seed_9 9
         - <<: *scanpy_random_base
-          random_seed: 10
+          random_seed: &pca_seed_10 10
           
     - id: scrapper_random
       name: "Scrapper randomized PCA"
@@ -207,12 +204,32 @@ stages:
         commit: 51a6fcadf67421ee3ff4dc6277cb0145d834aa8b
         entrypoint: pca
       parameters:
-        - solver: random
-          n_components: 50
-          n_iter: 2
-          n_oversamples: 10
-          random_seed: 1
+        - &scrapper_random_base
+          solver: random
+          n_components: *pca_n_components
+          random_seed: *pca_seed_1
+          n_iter: *pca_n_iter
+          n_oversamples: *pca_n_oversamples
           num_threads: 1
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_2
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_3
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_4
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_5
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_6
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_7
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_8
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_9
+        - <<: *scrapper_random_base
+          random_seed: *pca_seed_10
+
     - id: scrapper_exact
       name: "Scrapper exact PCA"
       software_environment: scrapper_env
@@ -227,6 +244,61 @@ stages:
           n_oversamples: 10
           random_seed: 1
           num_threads: 1
+    
+    - id: rapids_random
+      name: "RAPIDS randomized PCA"
+      software_environment: rapids_env
+      requires_capabilities: 
+        - gpu
+      resources:
+        gpu: 1
+      repository:
+        url: https://github.com/stepushkina05-jpg/rapids_random
+        commit: ed06108e97c0d57a609d321a7062e5c39233ac73
+        entrypoint: pca
+        parameters:
+        - &rapids_random_base
+          solver: rapids-randomized
+          n_components: *pca_n_components
+          random_seed: *pca_seed_1
+          n_iter: *pca_n_iter
+          n_oversamples: *pca_n_oversamples
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_2
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_3
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_4
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_5
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_6
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_7
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_8
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_9
+        - <<: *rapids_random_base
+          random_seed: *pca_seed_10
+
+    - id: rapids_exact
+      name: "RAPIDS exact PCA"
+      software_environment: rapids_env
+      requires_capabilities: 
+        - gpu
+      resources:
+        gpu: 1
+      repository:
+        url: https://github.com/stepushkina05-jpg/rapids_random
+        commit: ed06108e97c0d57a609d321a7062e5c39233ac73
+        entrypoint: pca
+      parameters:
+        - solver: rapids-exact
+          n_components: 50
+          random_seed: 1
+          n_iter: 2
+          n_oversamples: 10
 
   - id: EIGENGAP
     inputs:
@@ -245,6 +317,7 @@ stages:
         exclude:
         - scanpy_random
         - scrapper_random
+        - rapids_random 
         repository: 
           url: https://github.com/stepushkina05-jpg/Randomized_PCA
           commit: 22c97e9103d6e9074adf555848acb63097e90c56
