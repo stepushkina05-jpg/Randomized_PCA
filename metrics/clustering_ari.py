@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""Evaluate Leiden clustering stability using the adjusted Rand index.
+
+The script reads a selected-clustering manifest containing results for one or
+more Leiden resolutions. It either compares each clustering with ground-truth
+labels or compares best- and worst-seed PCA clusterings with the corresponding
+exact-PCA clustering produced under the same clustering configuration.
+"""
 
 import argparse
 from pathlib import Path
@@ -7,11 +14,20 @@ import pandas as pd
 from sklearn.metrics import adjusted_rand_score
 
 
+CONFIG_COLUMNS = [
+    "resolution",
+    "clustering_seed",
+    "flavor",
+    "partition_type",
+]
+
+
 def get_dataset(path: Path):
     parts = path.parts
     if "DATA" not in parts:
         raise ValueError(f"Could not identify dataset from {path}")
     return parts[parts.index("DATA") + 1]
+
 
 def load_clusters(path: Path):
     df = pd.read_csv(path, sep="\t")
@@ -35,9 +51,8 @@ def compare_clusterings(path_a: Path, path_b: Path, column_b="cluster", require_
     if require_same_cells:
         if len(merged) != len(A) or len(merged) != len(B):
             raise ValueError("Cell IDs differ between clustering and reference clustering.")
-    else:
-        if len(merged) != len(B):
-            raise ValueError("Some ground-truth cell IDs are missing from the clustering.")
+    elif len(merged) != len(B):
+        raise ValueError("Some ground-truth cell IDs are missing from the clustering.")
 
     ari = adjusted_rand_score(merged["cluster_a"], merged["cluster_b"])
     n_clusters_test = merged["cluster_a"].nunique()
@@ -46,8 +61,21 @@ def compare_clusterings(path_a: Path, path_b: Path, column_b="cluster", require_
     return ari, n_clusters_test, n_clusters_reference
 
 
+def result_metadata(row):
+    return {
+        "dataset": row["dataset"],
+        "method": row["method"],
+        "k": int(row["k"]),
+        "selection": row["selection"],
+        "pca_seed": row["pca_seed"],
+        **{column: row[column] for column in CONFIG_COLUMNS},
+    }
+
+
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Calculate clustering ARI against ground truth or exact-PCA clustering."
+    )
     parser.add_argument("--selected_clustering_manifest", required=True)
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--name", required=True)
@@ -64,19 +92,18 @@ def main():
         "selection",
         "pca_seed",
         "clusters_file",
+        *CONFIG_COLUMNS,
     }
 
     if not required.issubset(manifest.columns):
-        raise ValueError(
-            f"selected_clustering_manifest must contain columns {sorted(required)}"
-        )
+        missing = sorted(required - set(manifest.columns))
+        raise ValueError(f"selected_clustering_manifest is missing columns {missing}")
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-
     results = []
 
-    # Ground-truth mode
+    # Ground-truth reference mode
     if args.labels_tsv:
         labels_files = {}
 
@@ -95,21 +122,15 @@ def main():
             if dataset not in labels_files:
                 raise ValueError(f"No ground-truth labels found for {dataset}")
 
-            labels_file = labels_files[dataset]
-
             ari, n_clusters_test, n_clusters_reference = compare_clusterings(
                 Path(row["clusters_file"]),
-                labels_file,
+                labels_files[dataset],
                 args.label_column,
                 require_same_cells=False,
             )
 
             results.append({
-                "dataset": dataset,
-                "method": row["method"],
-                "k": int(row["k"]),
-                "selection": row["selection"],
-                "pca_seed": row["pca_seed"],
+                **result_metadata(row),
                 "reference": "ground_truth",
                 "n_clusters_test": n_clusters_test,
                 "n_clusters_reference": n_clusters_reference,
@@ -118,15 +139,15 @@ def main():
 
     # Exact-PCA clustering reference mode
     else:
-        for (dataset, method, k), group in manifest.groupby(
-            ["dataset", "method", "k"]
-        ):
+        group_columns = ["dataset", "method", "k", *CONFIG_COLUMNS]
+
+        for group_key, group in manifest.groupby(group_columns, dropna=False):
+            config = dict(zip(group_columns, group_key))
             exact_rows = group[group["selection"] == "exact"]
 
             if len(exact_rows) != 1:
                 raise ValueError(
-                    f"Expected exactly one exact clustering for "
-                    f"{dataset}, {method}, k={k}"
+                    f"Expected exactly one exact clustering for configuration {config}"
                 )
 
             exact_file = Path(exact_rows.iloc[0]["clusters_file"])
@@ -136,12 +157,10 @@ def main():
 
                 if len(rows) != 1:
                     raise ValueError(
-                        f"Expected exactly one {selection} clustering for "
-                        f"{dataset}, {method}, k={k}"
+                        f"Expected exactly one {selection} clustering for configuration {config}"
                     )
 
                 row = rows.iloc[0]
-
                 ari, n_clusters_test, n_clusters_reference = compare_clusterings(
                     Path(row["clusters_file"]),
                     exact_file,
@@ -149,11 +168,7 @@ def main():
                 )
 
                 results.append({
-                    "dataset": dataset,
-                    "method": method,
-                    "k": int(k),
-                    "selection": selection,
-                    "pca_seed": row["pca_seed"],
+                    **result_metadata(row),
                     "reference": "exact",
                     "n_clusters_test": n_clusters_test,
                     "n_clusters_reference": n_clusters_reference,
@@ -163,9 +178,14 @@ def main():
     results = pd.DataFrame(results)
 
     if not results.empty:
-        results = results.sort_values(
-            ["dataset", "method", "k", "selection"]
-        )
+        results = results.sort_values([
+            "dataset",
+            "method",
+            "k",
+            "resolution",
+            "clustering_seed",
+            "selection",
+        ])
 
     output_file = output_dir / f"{args.name}_clustering_ari.tsv"
     results.to_csv(output_file, sep="\t", index=False)
