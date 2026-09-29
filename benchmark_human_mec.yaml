@@ -1,0 +1,356 @@
+name: randomized-pca
+id: randomized_pca
+description: Benchmarking randomized PCA stability and downstream effects in single-cell
+  RNA-seq analysis
+benchmarker: Diana Stepushkina <stepushkina.05@gmail.com>
+version: 0.1.0
+software_backend: conda
+software_environments:
+  scanpy_env:
+    name: Scanpy environment
+    description: Environment for Scanpy preprocessing and PCA
+    conda: envs/scanpy.yaml
+  scrapper_env:
+    name: Scrapper environment
+    description: Environment for Scrapper PCA
+    conda: envs/scrapper.yaml
+  rapids_env:
+    name: Rapids singlecell environment
+    description: Environment for Rapids singlecell PCA
+    conda: envs/rapids.yaml
+entrypoints:
+  data: raw_h5ad.py
+  normalize: normalize.py
+  feat-select: feat-select.py
+  pca: pca.py
+stages:
+- id: DATA
+  outputs:
+  - id: rawdata_h5ad
+    path: '{name}.h5ad'
+  - id: properties_info
+    path: '{name}_properties.yaml'
+  - id: labels_tsv
+    path: '{name}.clusters_truth.tsv'
+  - id: num_clusters_truth
+    path: '{name}.clusters_truth_num.txt'
+  modules:
+  - id: human_mec_50362
+    name: Human medial entorhinal cortex 50k
+    software_environment: scrapper_env
+    repository:
+      url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
+      commit: 412f066d707d023d7b2c2d9ab4d3ffd4e29f36d3
+      entrypoint: default
+    parameters:
+    - dataset_name: human_mec_50362
+      batch_var: donor_id
+      sample_var: sample_id
+      labels_var: supercluster_term
+- id: IDS
+  inputs:
+  - rawdata_h5ad
+  outputs:
+  - id: filtered_cellids
+    path: '{dataset}_cellids.txt.gz'
+  - id: filtered_featureids
+    path: '{dataset}_featureids.txt.gz'
+  modules:
+  - id: identity_ids
+    name: Keep all cells and genes
+    software_environment: scanpy_env
+    repository:
+      url: https://github.com/stepushkina05-jpg/scanpy_random
+      commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
+      entrypoint: ids
+- id: NORM
+  inputs:
+  - rawdata_h5ad
+  - filtered_cellids
+  - filtered_featureids
+  outputs:
+  - id: normalized_h5
+    path: '{dataset}_normalized.h5'
+  modules:
+  - id: norm_scanpy
+    name: Scanpy CP10k log1p normalization
+    software_environment: scanpy_env
+    repository:
+      url: https://github.com/stepushkina05-jpg/scanpy_random
+      commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
+      entrypoint: normalize
+    parameters:
+    - flavor: log1pCP10k
+- id: FEAT
+  inputs:
+  - rawdata_h5ad
+  - normalized_h5
+  - filtered_cellids
+  - filtered_featureids
+  - properties_info
+  outputs:
+  - id: normalized_selected_h5
+    path: '{dataset}_normalized_selected.h5'
+  modules:
+  - id: feat_scanpy
+    name: Scanpy Seurat HVG selection
+    software_environment: scanpy_env
+    repository:
+      url: https://github.com/omni-scrna/scanpy
+      commit: 2a56c14
+      entrypoint: feat-select
+    parameters:
+    - flavor: scanpy_seurat
+      number_selected: 2000
+- id: PCA
+  inputs:
+  - normalized_selected_h5
+  outputs:
+  - id: pca_scores
+    path: '{dataset}_pcas.tsv'
+  - id: pca_loadings
+    path: '{dataset}_loadings.tsv'
+  modules:
+  - id: scanpy_exact
+    name: Scanpy exact PCA
+    software_environment: scanpy_env
+    repository:
+      url: https://github.com/stepushkina05-jpg/scanpy_random
+      commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
+      entrypoint: pca
+    parameters:
+    - solver: full
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 1
+      n_iter: 2
+      n_oversamples: 10
+  - id: scanpy_random
+    name: Scanpy randomized PCA
+    software_environment: scanpy_env
+    repository:
+      url: https://github.com/stepushkina05-jpg/scanpy_random
+      commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
+      entrypoint: pca
+    parameters:
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 1
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 2
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 3
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 4
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 5
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 6
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 7
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 8
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 9
+      n_iter: 2
+      n_oversamples: 10
+    - solver: randomized
+      dense: 'true'
+      dtype: float64
+      blas_threads: 1
+      n_components: 50
+      random_seed: 10
+      n_iter: 2
+      n_oversamples: 10
+  - id: scrapper_random
+    name: Scrapper randomized PCA
+    software_environment: scrapper_env
+    repository:
+      url: https://github.com/stepushkina05-jpg/scrapper_random
+      commit: 51a6fcadf67421ee3ff4dc6277cb0145d834aa8b
+      entrypoint: pca
+    parameters:
+    - solver: random
+      n_components: 50
+      random_seed: 1
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 2
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 3
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 4
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 5
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 6
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 7
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 8
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 9
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+    - solver: random
+      n_components: 50
+      random_seed: 10
+      n_iter: 2
+      n_oversamples: 10
+      num_threads: 1
+  - id: scrapper_exact
+    name: Scrapper exact PCA
+    software_environment: scrapper_env
+    repository:
+      url: https://github.com/stepushkina05-jpg/scrapper_random
+      commit: 51a6fcadf67421ee3ff4dc6277cb0145d834aa8b
+      entrypoint: pca
+    parameters:
+    - solver: exact
+      n_components: 50
+      n_iter: 2
+      n_oversamples: 10
+      random_seed: 1
+      num_threads: 1
+- id: EIGENGAP
+  inputs:
+  - pca_scores
+  outputs:
+  - id: eigengaps
+    path: '{dataset}_eigengaps.tsv'
+  - id: selected_k
+    path: '{dataset}_smallest_eigengaps.tsv'
+  - id: eigengap_figure
+    path: '{dataset}_eigengaps.png'
+  modules:
+  - id: eigengap
+    name: Exact PCA eigengap analysis
+    software_environment: scanpy_env
+    exclude:
+    - scanpy_random
+    - scrapper_random
+    - rapids_random
+    repository:
+      url: https://github.com/stepushkina05-jpg/Randomized_PCA
+      commit: 22c97e9103d6e9074adf555848acb63097e90c56
+      entrypoint: eigengap
+    parameters:
+    - n_smallest: 5
+metric_collectors:
+- id: principal_angles
+  name: PCA principal-angle subspace analysis
+  software_environment: scanpy_env
+  repository:
+    url: https://github.com/stepushkina05-jpg/Randomized_PCA
+    commit: 22c97e9103d6e9074adf555848acb63097e90c56
+    entrypoint: principal_angles
+  inputs:
+  - pca_loadings
+  - selected_k
+  outputs:
+  - id: subspace_errors
+    path: '{name}/subspace_errors.tsv'
+  - id: selected_seeds
+    path: '{name}/selected_seeds.tsv'
+  - id: pca_manifest
+    path: '{name}/pca_manifest.tsv'
+- id: pca_accuracy
+  name: PCA approximation accuracy
+  software_environment: scanpy_env
+  repository:
+    url: https://github.com/stepushkina05-jpg/Randomized_PCA
+    commit: 22c97e9103d6e9074adf555848acb63097e90c56
+    entrypoint: pca-accuracy
+  inputs:
+  - pca_loadings
+  - normalized_selected_h5
+  outputs:
+  - id: approximation_accuracy
+    path: '{name}/approximation_accuracy.tsv'
+  - id: pc_correlations
+    path: '{name}/pc_correlations.tsv'

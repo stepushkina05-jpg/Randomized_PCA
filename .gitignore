@@ -67,3 +67,5 @@ Thumbs.db
 
 /PCA_output/
 results_server/
+test_results/
+test_metrics/

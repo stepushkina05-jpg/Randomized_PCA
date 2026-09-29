@@ -43,6 +43,10 @@ stages:
         path: "{name}.h5ad"
       - id: properties_info
         path: "{name}_properties.yaml"
+      - id: labels_tsv
+        path: "{name}.clusters_truth.tsv"
+      - id: num_clusters_truth
+        path: "{name}.clusters_truth_num.txt"
 
     modules:
       - id: p31_s42_narrow_signal
@@ -50,28 +54,43 @@ stages:
         software_environment: scrapper_env
         repository:
           url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
-          commit: a84f4d04ffdfbb597cedee4d4c99f0d19951620a
+          commit: 412f066d707d023d7b2c2d9ab4d3ffd4e29f36d3
           entrypoint: default
         parameters:
           - dataset_name: p31_s42_narrow_signal
+            labels_var: Group
       - id: p35_s42_broad_signal
         name: "p35 s42 broad signal"
         software_environment: scrapper_env
         repository:
           url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
-          commit: a84f4d04ffdfbb597cedee4d4c99f0d19951620a
+          commit: 412f066d707d023d7b2c2d9ab4d3ffd4e29f36d3
           entrypoint: default
         parameters:
           - dataset_name: p35_s42_broad_signal
+            labels_var: Group
       - id: p38_s42_strong_signal
         name: "p38 s42 strong signal"
         software_environment: scrapper_env
         repository:
           url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
-          commit: a84f4d04ffdfbb597cedee4d4c99f0d19951620a
+          commit: 412f066d707d023d7b2c2d9ab4d3ffd4e29f36d3
           entrypoint: default
         parameters:
           - dataset_name: p38_s42_strong_signal
+            labels_var: Group
+      - id: human_mec_50362
+        name: "Human medial entorhinal cortex 50k"
+        software_environment: scrapper_env
+        repository:
+          url: https://github.com/stepushkina05-jpg/randomized-pca-data.git
+          commit: 412f066d707d023d7b2c2d9ab4d3ffd4e29f36d3
+          entrypoint: default
+        parameters:
+          - dataset_name: human_mec_50362
+            batch_var: donor_id
+            sample_var: sample_id
+            labels_var: supercluster_term
   
   - id: IDS
     inputs:

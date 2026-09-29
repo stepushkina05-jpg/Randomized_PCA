@@ -26,7 +26,7 @@ stages:
         software_environment: scanpy_env
         repository:
           url: https://github.com/stepushkina05-jpg/Randomized_PCA
-          commit: 22c97e9103d6e9074adf555848acb63097e90c56
+          commit: da84d30cdd4c01ff8b35dbe3223105d10c4a681b
           entrypoint: knn-inputs
         parameters:
           - selected_seeds_source: "principal_angles/selected_seeds.tsv"
@@ -47,7 +47,7 @@ stages:
         software_environment: scanpy_env
         repository:
           url: https://github.com/stepushkina05-jpg/Randomized_PCA
-          commit: 22c97e9103d6e9074adf555848acb63097e90c56
+          commit: da84d30cdd4c01ff8b35dbe3223105d10c4a681b
           entrypoint: knn
         parameters:
           - n_neighbors: 15
@@ -81,7 +81,7 @@ stages:
         software_environment: scanpy_env
         repository:
           url: https://github.com/stepushkina05-jpg/scanpy_random
-          commit: 023780500adfb3fd74d44842086da2e77bbb440b
+          commit: 8ae110461df056bac4321719e05aa232b2502680
           entrypoint: selected-clustering
         parameters:
           - &clustering_defaults
@@ -117,5 +117,5 @@ stages:
         software_environment: scanpy_env
         repository:
           url: https://github.com/stepushkina05-jpg/Randomized_PCA
-          commit: 6a4de13fe8a47ebf4c586d00c0c0d9ff289c1bcd
+          commit: 9f753a849d244baef22c622ac9f4ae707025e92c
           entrypoint: clustering-ari
