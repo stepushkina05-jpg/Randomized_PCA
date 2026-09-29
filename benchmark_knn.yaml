@@ -72,24 +72,38 @@ stages:
   - id: CLUSTERING
     inputs:
       - selected_knn_manifest
-
     outputs:
       - id: selected_clustering_manifest
         path: "{dataset}_selected_clustering_manifest.tsv"
-
     modules:
       - id: selected_clustering
         name: "Leiden clustering of selected kNN graphs"
         software_environment: scanpy_env
         repository:
           url: https://github.com/stepushkina05-jpg/scanpy_random
-          commit: cf36012a56678d6fc1528883183c64142a62a8cb
+          commit: 023780500adfb3fd74d44842086da2e77bbb440b
           entrypoint: selected-clustering
         parameters:
-          - resolution: 1.0
+          - &clustering_defaults
+            resolution: 0.25
             random_seed: 1
             flavor: igraph
             partition_type: RBConfiguration
+
+          - <<: *clustering_defaults
+            resolution: 0.5
+
+          - <<: *clustering_defaults
+            resolution: 0.75
+
+          - <<: *clustering_defaults
+            resolution: 1.0
+
+          - <<: *clustering_defaults
+            resolution: 1.5
+
+          - <<: *clustering_defaults
+            resolution: 2.0
 
   - id: CLUSTERING_ARI
     inputs:
@@ -103,5 +117,5 @@ stages:
         software_environment: scanpy_env
         repository:
           url: https://github.com/stepushkina05-jpg/Randomized_PCA
-          commit: 7c97dc6221b1a2bce6f10e8b23d19dd2f6254a33
+          commit: 6a4de13fe8a47ebf4c586d00c0c0d9ff289c1bcd
           entrypoint: clustering-ari
