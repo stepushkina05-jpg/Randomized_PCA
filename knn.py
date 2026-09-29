@@ -122,10 +122,41 @@ def run_selected(args):
 
     pca_manifest = pd.read_csv(args.pca_manifest, sep="\t")
 
-    required_manifest = {"dataset", "method", "pca_type", "seed", "pca_file"}
-    if not required_manifest.issubset(pca_manifest.columns):
-        raise ValueError(f"pca_manifest must contain columns {sorted(required_manifest)}")
+    required_manifest = {
+        "dataset",
+        "method",
+        "pca_type",
+        "seed",
+        "pca_file",
+        "labels_file",
+    }
 
+    if not required_manifest.issubset(pca_manifest.columns):
+        raise ValueError(
+            f"pca_manifest must contain columns {sorted(required_manifest)}"
+        )
+
+    labels_files = {}
+
+    for dataset, group in pca_manifest.groupby("dataset"):
+        paths = group["labels_file"].dropna().astype(str).unique()
+
+        if len(paths) != 1:
+            raise ValueError(
+                f"Expected exactly one labels_file for {dataset}, "
+                f"found {list(paths)}"
+            )
+
+        labels_file = Path(paths[0])
+
+        if not labels_file.exists():
+            raise FileNotFoundError(
+                f"Missing ground-truth labels for {dataset}: {labels_file}"
+            )
+
+        labels_files[dataset] = labels_file.resolve()
+
+    
     exact_scores = {}
     random_scores = {}
 
@@ -186,6 +217,7 @@ def run_selected(args):
                 "dataset": dataset,
                 "method": method,
                 "k": k,
+                "labels_file": str(labels_files[dataset]),
                 "selection": "exact",
                 "pca_seed": "",
                 "pca_file": str(exact_scores[exact_key]),
@@ -228,6 +260,7 @@ def run_selected(args):
             "dataset": dataset,
             "method": method,
             "k": k,
+            "labels_file": str(labels_files[dataset]),
             "selection": selection,
             "pca_seed": seed,
             "pca_file": str(random_scores[key]),
