@@ -19,8 +19,6 @@ stages:
         path: "selected_seeds.tsv"
       - id: pca_manifest
         path: "pca_manifest.tsv"
-      - id: labels_tsv
-        path: "DATA/human_mec_50362/human_mec_50362.clusters_truth.tsv"
 
     modules:
       - id: local_knn_inputs
@@ -33,8 +31,6 @@ stages:
         parameters:
           - selected_seeds_source: "principal_angles/selected_seeds.tsv"
             pca_manifest_source: "principal_angles/pca_manifest.tsv"
-            labels_source: "human_mec_50362.clusters_truth.tsv"
-            dataset_name: human_mec_50362
 
   - id: KNN
     inputs:
@@ -76,7 +72,6 @@ stages:
   - id: CLUSTERING
     inputs:
       - selected_knn_manifest
-      - labels_tsv
     outputs:
       - id: selected_clustering_manifest
         path: "{dataset}_selected_clustering_manifest.tsv"
@@ -113,7 +108,6 @@ stages:
   - id: CLUSTERING_ARI
     inputs:
       - selected_clustering_manifest
-      - labels_tsv
     outputs:
       - id: clustering_ari
         path: "{dataset}_clustering_ari.tsv"
