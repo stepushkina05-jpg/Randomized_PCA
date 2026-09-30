@@ -74,18 +74,17 @@ test -s out/principal_angles/pca_manifest.tsv
 
 echo "Checking generated PCA manifest"
 python - <<'PY'
-import pandas as pd
+echo "Generated PCA inputs:"
+wc -l out/principal_angles/pca_manifest.tsv
+wc -l out/principal_angles/selected_seeds.tsv
 
-manifest = pd.read_csv("out/principal_angles/pca_manifest.tsv", sep="\t")
-selected = pd.read_csv("out/principal_angles/selected_seeds.tsv", sep="\t")
+echo
+echo "PCA manifest preview:"
+head -n 5 out/principal_angles/pca_manifest.tsv
 
-print("\nPCA manifest:")
-print(manifest.groupby(["method", "pca_type"]).size())
-
-print("\nSelected seeds:")
-print(selected.groupby(["method", "selection"]).size())
-PY
-
+echo
+echo "Selected seeds preview:"
+head -n 5 out/principal_angles/selected_seeds.tsv
 echo "Running kNN, overlap, clustering and ARI benchmark"
 ob run "$KNN_PLAN" -- \
     --cores 1 \
