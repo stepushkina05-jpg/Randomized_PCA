@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""Prepare PCA and seed-selection inputs for the second-pass kNN benchmark.
+
+The PCA manifest is enriched with a labels_file column. If a dataset has a
+ground-truth label file, its absolute path is stored for every corresponding
+PCA run. For datasets without labels, labels_file is left empty.
+"""
 
 import argparse
 import shutil
@@ -7,27 +13,34 @@ from pathlib import Path
 import pandas as pd
 
 
-def find_labels_file(out_root: Path, dataset: str) -> Path:
-    candidates = list(
-        (out_root / "DATA" / dataset).glob(
+def find_labels_file(out_root: Path, dataset: str) -> Path | None:
+    candidates = {
+        path.resolve()
+        for path in (out_root / "DATA" / dataset).glob(
             ".*/*.clusters_truth.tsv"
         )
-    )
+        if path.is_file()
+    }
 
-    if len(candidates) != 1:
+    candidates = sorted(candidates, key=str)
+
+    if not candidates:
+        return None
+
+    if len(candidates) > 1:
         raise ValueError(
-            f"Expected exactly one truth-label file for {dataset}, "
+            f"Expected at most one truth-label file for {dataset}, "
             f"found {len(candidates)}: {candidates}"
         )
 
-    return candidates[0].resolve()
+    return candidates[0]
 
 
 def main():
     parser = argparse.ArgumentParser(
         description=(
-            "Copy principal-angle outputs into the second-pass KNN "
-            "benchmark and attach ground-truth label files."
+            "Copy principal-angle outputs into the second-pass kNN "
+            "benchmark and attach optional ground-truth label files."
         )
     )
 
@@ -59,12 +72,6 @@ def main():
             f"Missing pca_manifest source file: {manifest_source}"
         )
 
-    selected_target = output_dir / "selected_seeds.tsv"
-    manifest_target = output_dir / "pca_manifest.tsv"
-
-    shutil.copy2(selected_source, selected_target)
-
-    # Add the appropriate ground-truth label file to every PCA row.
     pca_manifest = pd.read_csv(manifest_source, sep="\t")
 
     if "dataset" not in pca_manifest.columns:
@@ -72,20 +79,29 @@ def main():
             f"{manifest_source} must contain a dataset column"
         )
 
-    labels_files = {
-        dataset: str(find_labels_file(out_root, dataset))
-        for dataset in pca_manifest["dataset"].drop_duplicates()
-    }
+    if pca_manifest["dataset"].isna().any():
+        raise ValueError(
+            f"{manifest_source} contains missing dataset values"
+        )
 
-    pca_manifest["labels_file"] = pca_manifest["dataset"].map(
-        labels_files
+    labels_files = {}
+
+    for dataset in pca_manifest["dataset"].drop_duplicates():
+        dataset = str(dataset)
+        labels_file = find_labels_file(out_root, dataset)
+        labels_files[dataset] = (
+            str(labels_file) if labels_file is not None else ""
+        )
+
+    pca_manifest["labels_file"] = (
+        pca_manifest["dataset"].astype(str).map(labels_files)
     )
 
-    pca_manifest.to_csv(
-        manifest_target,
-        sep="\t",
-        index=False,
-    )
+    selected_target = output_dir / "selected_seeds.tsv"
+    manifest_target = output_dir / "pca_manifest.tsv"
+
+    shutil.copy2(selected_source, selected_target)
+    pca_manifest.to_csv(manifest_target, sep="\t", index=False)
 
     print(f"Copied: {selected_source} -> {selected_target}")
     print(f"Enriched: {manifest_source} -> {manifest_target}")
@@ -93,7 +109,10 @@ def main():
     print("Ground-truth label files")
 
     for dataset, labels_file in labels_files.items():
-        print(f"  {dataset}: {labels_file}")
+        if labels_file:
+            print(f"  {dataset}: {labels_file}")
+        else:
+            print(f"  {dataset}: none")
 
 
 if __name__ == "__main__":
