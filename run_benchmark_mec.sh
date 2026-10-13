@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
 MAIN_PLAN="benchmark_human_mec.yaml"
 KNN_PLAN="benchmark_knn_human_mec.yaml"
 RUN_PLAN="$MAIN_PLAN"
+TEMP_CPU_PLAN=""
+
+cleanup() {
+    if [[ -n "$TEMP_CPU_PLAN" && -f "$TEMP_CPU_PLAN" ]]; then
+        rm -f -- "$TEMP_CPU_PLAN"
+    fi
+}
+
+trap cleanup EXIT
 
 if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1; then
     echo "NVIDIA GPU detected: Scanpy, Scrapper and RAPIDS will run."
@@ -14,13 +23,11 @@ else
     echo "No NVIDIA GPU detected: RAPIDS will be removed from this run."
 
     CPU_TEMP="$(mktemp "$ROOT/.benchmark_mec_cpu.XXXXXX")"
-    CPU_PLAN="${CPU_TEMP}.yaml"
-    mv "$CPU_TEMP" "$CPU_PLAN"
+    TEMP_CPU_PLAN="${CPU_TEMP}.yaml"
+    mv "$CPU_TEMP" "$TEMP_CPU_PLAN"
+    RUN_PLAN="$TEMP_CPU_PLAN"
 
-    RUN_PLAN="$CPU_PLAN"
-    trap 'rm -f "$CPU_PLAN"' EXIT
-
-    python - "$MAIN_PLAN" "$CPU_PLAN" <<'PY'
+    python - "$MAIN_PLAN" "$TEMP_CPU_PLAN" <<'PY'
 import sys
 from pathlib import Path
 
@@ -72,8 +79,6 @@ ob run "$RUN_PLAN" -- \
 test -s out/principal_angles/selected_seeds.tsv
 test -s out/principal_angles/pca_manifest.tsv
 
-echo "Checking generated PCA manifest"
-python - <<'PY'
 echo "Generated PCA inputs:"
 wc -l out/principal_angles/pca_manifest.tsv
 wc -l out/principal_angles/selected_seeds.tsv
@@ -85,6 +90,8 @@ head -n 5 out/principal_angles/pca_manifest.tsv
 echo
 echo "Selected seeds preview:"
 head -n 5 out/principal_angles/selected_seeds.tsv
+
+echo
 echo "Running kNN, overlap, clustering and ARI benchmark"
 ob run "$KNN_PLAN" -- \
     --cores 1 \

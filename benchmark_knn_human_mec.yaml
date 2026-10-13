@@ -85,25 +85,37 @@ stages:
           entrypoint: selected-clustering
         parameters:
           - &clustering_defaults
-            resolution: 0.25
+            resolution: 0.1
             random_seed: 1
             flavor: igraph
             partition_type: RBConfiguration
 
           - <<: *clustering_defaults
+            resolution: 0.2
+
+          - <<: *clustering_defaults
+            resolution: 0.3
+
+          - <<: *clustering_defaults
+            resolution: 0.4
+
+          - <<: *clustering_defaults
             resolution: 0.5
 
           - <<: *clustering_defaults
-            resolution: 0.75
+            resolution: 0.6 
+            
+          - <<: *clustering_defaults
+            resolution: 0.7
 
           - <<: *clustering_defaults
-            resolution: 1.0
+            resolution: 0.8
 
           - <<: *clustering_defaults
-            resolution: 1.5
+            resolution: 0.9
 
           - <<: *clustering_defaults
-            resolution: 2.0
+            resolution: 1.0 
 
   - id: CLUSTERING_ARI
     inputs:

@@ -57,6 +57,8 @@ Thumbs.db
 *.h5
 
 #Figures 
+figures/
+seed_effect_analysis/
 
 *.png
 

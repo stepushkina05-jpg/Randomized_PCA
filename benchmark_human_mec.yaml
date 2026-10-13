@@ -150,7 +150,6 @@ stages:
         random_seed: &pca_seed_1 1
         n_iter: &pca_n_iter 2
         n_oversamples: &pca_n_oversamples 10
-
       - <<: *scanpy_random_base
         random_seed: &pca_seed_2 2
       - <<: *scanpy_random_base
@@ -169,21 +168,101 @@ stages:
         random_seed: &pca_seed_9 9
       - <<: *scanpy_random_base
         random_seed: &pca_seed_10 10
-        
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_11 11
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_12 12
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_13 13
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_14 14
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_15 15
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_16 16
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_17 17
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_18 18
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_19 19
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_20 20
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_21 21
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_22 22
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_23 23
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_24 24
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_25 25
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_26 26
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_27 27
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_28 28
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_29 29
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_30 30
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_31 31
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_32 32
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_33 33
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_34 34
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_35 35
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_36 36
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_37 37
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_38 38
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_39 39
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_40 40
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_41 41
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_42 42
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_43 43
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_44 44
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_45 45
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_46 46
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_47 47
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_48 48
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_49 49
+      - <<: *scanpy_random_base
+        random_seed: &pca_seed_50 50
+    
   - id: scrapper_random
     name: "Scrapper randomized PCA"
     software_environment: scrapper_env
     repository:
       url: https://github.com/stepushkina05-jpg/scrapper_random
-      commit: 51a6fcadf67421ee3ff4dc6277cb0145d834aa8b
+      commit: 1e1478afc0b1cc7ba8a324940a7e55f1152aeeb0
       entrypoint: pca
     parameters:
       - &scrapper_random_base
-        solver: random
+        solver: irlba
         n_components: *pca_n_components
         random_seed: *pca_seed_1
-        n_iter: *pca_n_iter
-        n_oversamples: *pca_n_oversamples
+        n_iter: 3
+        n_oversamples: 20
         num_threads: 1
       - <<: *scrapper_random_base
         random_seed: *pca_seed_2
@@ -203,21 +282,104 @@ stages:
         random_seed: *pca_seed_9
       - <<: *scrapper_random_base
         random_seed: *pca_seed_10
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_11
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_12
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_13
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_14
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_15
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_16
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_17
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_18
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_19
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_20
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_21
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_22
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_23
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_24
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_25
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_26
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_27
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_28
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_29
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_30
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_31
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_32
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_33
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_34
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_35
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_36
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_37
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_38
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_39
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_40
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_41
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_42
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_43
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_44
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_45
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_46
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_47
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_48
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_49
+      - <<: *scrapper_random_base
+        random_seed: *pca_seed_50
+
 
   - id: scrapper_exact
-    name: "Scrapper exact PCA"
-    software_environment: scrapper_env
+    name: "Scanpy exact PCA"
+    software_environment: scanpy_env
     repository:
-      url: https://github.com/stepushkina05-jpg/scrapper_random
-      commit: 51a6fcadf67421ee3ff4dc6277cb0145d834aa8b
+      url: https://github.com/stepushkina05-jpg/scanpy_random
+      commit: 6550c68d86810bcbc5859caf5f8aad32bac242d0
       entrypoint: pca
     parameters:
-      - solver: exact
+      - solver: full
+        dense: "true"
+        dtype: float64
+        blas_threads: 1
         n_components: 50
+        random_seed: 1
         n_iter: 2
         n_oversamples: 10
-        random_seed: 1
-        num_threads: 1
   
   - id: rapids_random
     name: "RAPIDS randomized PCA"
@@ -255,6 +417,86 @@ stages:
         random_seed: *pca_seed_9
       - <<: *rapids_random_base
         random_seed: *pca_seed_10
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_11
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_12
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_13
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_14
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_15
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_16
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_17
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_18
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_19
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_20
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_21
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_22
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_23
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_24
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_25
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_26
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_27
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_28
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_29
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_30
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_31
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_32
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_33
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_34
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_35
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_36
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_37
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_38
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_39
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_40
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_41
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_42
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_43
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_44
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_45
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_46
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_47
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_48
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_49
+      - <<: *rapids_random_base
+        random_seed: *pca_seed_50
 
   - id: rapids_exact
     name: "RAPIDS exact PCA"
