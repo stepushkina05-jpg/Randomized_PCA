@@ -364,19 +364,4 @@ metric_collectors:
         path: "{name}/pca_manifest.tsv"
 
   
-  - id: pca_accuracy
-    name: "PCA approximation accuracy"
-    software_environment: scanpy_env
-    repository:
-      url: https://github.com/stepushkina05-jpg/Randomized_PCA
-      commit: 22c97e9103d6e9074adf555848acb63097e90c56
-      entrypoint: pca-accuracy
-    inputs:
-      - pca_loadings
-      - normalized_selected_h5
-    outputs:
-      - id: approximation_accuracy
-        path: "{name}/approximation_accuracy.tsv"
-      - id: pc_correlations
-        path: "{name}/pc_correlations.tsv"
-      
+  

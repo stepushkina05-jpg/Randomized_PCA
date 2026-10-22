@@ -6,4 +6,3 @@ entrypoints:
   knn-overlap: metrics/knn_overlap.py
   selected-clustering: selected_clustering.py
   clustering-ari: metrics/clustering_ari.py
-  pca-accuracy: metrics/pca_accuracy.py

@@ -52,6 +52,8 @@ Thumbs.db
 # CSV files
 
 *.csv
+*.tsv
+*.pdf
 
 # Input matrices 
 *.h5
@@ -62,8 +64,7 @@ seed_effect_analysis/
 
 *.png
 
-#Time stamps
-*.tsv
+
 
 #test
 
