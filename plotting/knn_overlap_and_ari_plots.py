@@ -15,9 +15,9 @@ import pandas as pd
 
 # Figure styling belongs in the script, not the command-line parser.
 plt.rcParams.update({
-    "font.size": 17, "axes.titlesize": 22, "axes.labelsize": 21,
-    "xtick.labelsize": 17, "ytick.labelsize": 17, "legend.fontsize": 19,
-    "figure.titlesize": 24, "pdf.fonttype": 42,
+    "font.size": 17, "axes.titlesize": 22, "axes.labelsize": 23,
+    "xtick.labelsize": 22, "ytick.labelsize": 22, "legend.fontsize": 25,
+    "figure.titlesize": 27, "pdf.fonttype": 42,
     "axes.spines.top": False, "axes.spines.right": False,
 })
 STYLES = {"exact": ("#52525B", "s"), "best": ("#0072B2", "o"), "worst": ("#D55E00", "^")}
